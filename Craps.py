@@ -5,6 +5,7 @@ random.seed(3456)
 class Craps:
     def __init__(self, min):
         self.min = min
+        self.weight = [36, 18, 12, 9, 7.2, 6, 7.2, 9, 12, 18, 36]
 
     def SimulateGame(self, bets, amounts):
         def AboveMinimum(amounts):
@@ -37,27 +38,6 @@ class Craps:
 
         r, summ = RollTheDices(bets)
 
-        if summ == 2 or summ == 12:
-            Playerwin_temp = [amount * abovemin * bet for amount, abovemin, bet in zip(amounts, AboveMinimum(amounts), r)]
-            Casinowin = sum(amounts) - sum(Playerwin_temp)
-            return [Casinowin, [0.9 * amount / (1 / 36) for amount in Playerwin_temp]]
-        elif summ == 3 or summ == 11:
-            Playerwin_temp = [amount * abovemin * bet for amount, abovemin, bet in zip(amounts, AboveMinimum(amounts), r)]
-            Casinowin = sum(amounts) - sum(Playerwin_temp)
-            return [Casinowin, [0.9 * amount / (1 / 18) for amount in Playerwin_temp]]
-        elif summ == 4 or summ == 10:
-            Playerwin_temp = [amount * abovemin * bet for amount, abovemin, bet in zip(amounts, AboveMinimum(amounts), r)]
-            Casinowin = sum(amounts) - sum(Playerwin_temp)
-            return [Casinowin, [0.9 * amount / (1 / 12) for amount in Playerwin_temp]]
-        elif summ == 5 or summ == 9:
-            Playerwin_temp = [amount * abovemin * bet for amount, abovemin, bet in zip(amounts, AboveMinimum(amounts), r)]
-            Casinowin = sum(amounts) - sum(Playerwin_temp)
-            return [Casinowin, [0.9 * amount / (1 / 9) for amount in Playerwin_temp]]
-        elif summ == 6 or summ == 8:
-            Playerwin_temp = [amount * abovemin * bet for amount, abovemin, bet in zip(amounts, AboveMinimum(amounts), r)]
-            Casinowin = sum(amounts) - sum(Playerwin_temp)
-            return [Casinowin, [0.9 * amount / (5 / 36) for amount in Playerwin_temp]]
-        else:
-            Playerwin_temp = [amount * abovemin * bet for amount, abovemin, bet in zip(amounts, AboveMinimum(amounts), r)]
-            Casinowin = sum(amounts) - sum(Playerwin_temp)
-            return [Casinowin, [0.9 * amount / (1 / 6) for amount in Playerwin_temp]]
+        Playerwin_temp = [amount * abovemin * bet for amount, abovemin, bet in zip(amounts, AboveMinimum(amounts), r)]
+        Casinowin = sum(amounts) - sum(Playerwin_temp)
+        return [Casinowin, [0.9 * amount * self.weight[summ - 2] for amount in Playerwin_temp]]
