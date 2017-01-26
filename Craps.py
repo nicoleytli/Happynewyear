@@ -38,7 +38,7 @@ class Craps:
 
         r, summ = RollTheDices(bets)
 
-        Playerwin_temp = [amount * abovemin * bet for amount, abovemin, bet in zip(amounts, AboveMinimum(amounts), r)]
-        Playerwin = [0.9 * amount * self.weight[summ - 2] for amount in Playerwin_temp]
-        Casinowin = sum(amounts) - sum(Playerwin)
-        return [Casinowin, Playerwin]
+        playerwin_temp = [amount * abovemin * bet for amount, abovemin, bet in zip(amounts, AboveMinimum(amounts), r)]
+        playerwin = [0.9 * amount * self.weight[summ - 2] for amount in playerwin_temp]
+        casinowin = sum(amounts) - sum(playerwin)
+        return [casinowin, playerwin]
