@@ -1,6 +1,6 @@
 import random
 
-class Casino(object):
+class LetsBegin(object):
     def __init__(self, numroulette, numcraps, Barman, Fixedwage, Cash, Total, Return, Bachelor, Free):
         self.numroulette = numroulette
         self.Crapstable = numcraps
@@ -27,8 +27,12 @@ class Casino(object):
     #
     # c = Customertype(self)
 
+class Casino:
+    def __init__(self, cash):
+        self.cash = cash
+        self.balance = cash
 
-
+C = Casino(cash)
 
 # class Employee(object):
 #     def __init__(self, fixedwage, type, other):
@@ -39,18 +43,23 @@ class Casino(object):
 #         else:
 #             self.wage += other
 
-class Employee(object):
-    def __init__(self, wage):
+
+class Croupier:
+    def __init__(self, wage, gain):
         self.wage = wage
+        self.gain = gain
+Cp = []
+for i in range(0, (numroulette + numcraps)):
+    Cp[i] = Croupier.wage(wage, 0)       #这里的wage是外部输入的
 
-class Croupier(Employee):
-    def Casinowin(self):
-        self.wage += Table.croupiergain
+class Barman:
+    def __init__(self, wage, tips):
+        self.wage = wage
+        self.tips = tips
 
-class Barmen(Employee):
-    def Tips(self, tips):
-        self.wage += tips
-
+B = []
+for i in range(0, (numroulette + numcraps)):
+    B[i] = Barman.wage(wage, 0)         #这里的wage是外部输入的
 
 # class Employee(object):
 #     def __init__(self, wage):
@@ -79,7 +88,7 @@ class Barmen(Employee):
 
 
 
-class Player(object):
+class Player:
     def __init__(self, budget, ptype, amount, bet):
         self.budget = budget
         self.balance = budget
@@ -125,24 +134,25 @@ def WhichTable(total, numroulette, numcraps):
         table[i] = random.choice(range(1, (numroulette + numcraps + 1)))
     return table
 
-#返回一个player的amount
-def MoneytoBet(tnum, ptype):
-    if ptype == "returing":
-        amount = TableMin(tnum)
-    elif ptype == "onetime":
-        amount = random.randint(0, int(P[i].balance/3))
-    else:
-        amount = random.randint(0, P[i].balance)
-    return amount
+# #返回一个player的amount
+# def MoneytoBet(tnum, ptype):
+#     if ptype == "returing":
+#         amount = TableMin(tnum)
+#     elif ptype == "onetime":
+#         amount = random.randint(0, int(P[i].balance/3))
+#     else:
+#         amount = random.randint(0, P[i].balance)
+#     return amount
+#
+# # 返回一个player的bet
+# def NumtoBet(tnum):
+#     if tnum <= numroulette:
+#         bet = random.randint(0, 36)
+#     else:
+#         bet = random.randint(2, 12)
+#     return bet
 
-# 返回一个player的bet
-def NumtoBet(tnum):
-    if tnum <= numroulette:
-        bet = random.randint(0, 36)
-    else:
-        bet = random.randint(2, 12)
-    return bet
-
+# 每一个player买drink的情况
 def Drink(balance):
     if balance >= 60:
         drink = random.randint(1, 2) * 20
@@ -152,6 +162,7 @@ def Drink(balance):
         tips = 0
     cost = drink + tips
     return drink, cost, tips
+
 
 class Table:
     def __init__(self, min):
@@ -243,7 +254,7 @@ def TableMin(numroulette, numcraps):
             tablemin[i] = random.choice(0, 25, 50)
     return tablemin
 
-def TableResult(bet, amount, tnum):
+def TableResult(bet, amount, tnum):  #这里的tnum是指bet和amount来源的list里的位置
     if tnum <= numroulette:
         T = Table(tablemin)
         result = T.SimulateGame(bet, amount, tnum)
@@ -256,10 +267,13 @@ cresult, cgain, presult = TableResult(bet, amount, tnum)
 C.balance += cresult  # 赌场从赌博来的收入
 C.balance += drink  # 赌场从饮料来的收入
 
-for i, j in zip(range(0, total), range(0, (numroulette + numcraps))):
+for i in range(0, total):
     P[i].balance += presult[i]  #赌博的收入
     P[i].balance -= cost  #从drink函数里来，买饮料的支出
-    Cp[j].wage += cgain
+
+for i in range(0, (numroulette + numcraps + 1)):
+    Cp[i].wage += cgain
+    Cp[i].gain += cgain
 
 
 
