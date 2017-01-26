@@ -32,7 +32,7 @@ class Roulette:
                 print("No winners this round")
             return (result2)
 
-        Playerwin_temp = [amount * abovemin * bet for amount, abovemin, bet in zip(amounts, AboveMinimum(amounts), SpinTheWheel(bets))]
-        Casinowin = sum(amounts) - sum(Playerwin_temp)
-        Playerwin = [i * 30 for i in Playerwin_temp]
-        return [Casinowin, Playerwin]
+        playerwin_temp = [amount * abovemin * bet for amount, abovemin, bet in zip(amounts, AboveMinimum(amounts), SpinTheWheel(bets))]
+        casinowin = sum(amounts) - sum(playerwin_temp)
+        playerwin = [i * 30 for i in playerwin_temp]
+        return [casinowin, playerwin]
