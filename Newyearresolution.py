@@ -19,28 +19,28 @@ def GetPtype(total, returning, bachelor):
     numbachelor = int(total * bachelor)
     numonetime = total - (numreturn + numbachelor)
     temp = []
-    temp.append(["returning" for i in range(numreturn)])
-    temp.append(["onetime" for i in range(numonetime)])
-    temp.append(["bachelor" for i in range(numbachelor)])
+    temp.extend(["returning" for i in range(numreturn)])
+    temp.extend(["onetime" for i in range(numonetime)])
+    temp.extend(["bachelor" for i in range(numbachelor)])
     return (temp)
 
-def GetBudget(ptype):
-    budget = 0
+def GetBudget(ptype, freebudget):
+    budget = []
     for item in ptype:
         if item == "returning":
-            budget = random.randint(100,300)
+            budget.extend([random.randint(100, 300)])
         elif item == "onetime":
-            budget = random.randint(200,300)
+            budget.extend([random.randint(200, 300)])
         else:
-            budget = random.randint(200,500) + freebudget              # freebudget 需要敲定
+            budget.extend([random.randint(200, 500) + freebudget])              # freebudget 需要敲定
     return budget
 
 # Step 1.3: 实例化
 ptype = GetPtype(total, returning, bachelor)
 P = []
+budget = GetBudget(ptype, freebudget)
 for i in range (0, total):
-    budget = GetBudget(ptype)
-    P[i] = Player(budget, 0, ptype[i], amount, bet, out)
+    P.append( Player(budget, 0, ptype[i], 0, 0, 0))
 
 # Step 2: set up table
 # Step 2.1: 生成和player人数相等的table数，用于分配player到各个table
