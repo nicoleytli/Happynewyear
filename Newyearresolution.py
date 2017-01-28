@@ -1,8 +1,9 @@
 # So nervous
 
 import random
+from functools import reduce
 
-# Step 1: set up player
+# Step 1: initialize player
 # Step 1.1: class
 class Player:
     def __init__(self, budget, gain, ptype, amount, bet, out):
@@ -40,22 +41,36 @@ ptype = GetPtype(total, returning, bachelor)
 P = []
 budget = GetBudget(ptype, freebudget)
 for i in range (0, total):
-    P.append( Player(budget, 0, ptype[i], 0, 0, 0))
+    P.append(Player(budget[i], 0, ptype[i], 0, 0, 0))
 
-# Step 2: set up table
+# Step 2: initialize table
 # Step 2.1: 生成和player人数相等的table数，用于分配player到各个table
 def WhichTable(total, numroulette, numcraps):
     table = []
     for i in range(total):
-        table[i] = random.randint(range(1, (numroulette + numcraps + 1)))
+        table.extend([random.randint(1, (numroulette + numcraps + 1))])
     return table
 
-# Step 2.2: 制定每个table的规则
+table = WhichTable(total, numroulette, numcraps)
+
+# Step 2.2: 返回所有table的最小amount
+def TableMin(numroulette, numcraps):
+    tablemin = []
+    for i in range(0, (numroulette + numcraps)):
+        if i < numroulette:
+            tablemin.extend([random.choice((50, 100, 200))])
+        else:
+            tablemin.extend([random.choice((0, 25, 50))])
+    return tablemin
+
+tablemin = TableMin(numroulette, numcraps)
+
+# Step 2.3: 制定每个table的规则
 class Table:
     def __init__(self, min):
         self.min = min
         self.weight = [36, 18, 12, 9, 7.2, 6, 7.2, 9, 12, 18, 36]
-        self.casinowin = 0
+
 
     def SimulateGame(self, bets, amounts, tnum):                     # tnum 可以分辨ttype
         def AboveMinimum(amounts):
@@ -64,7 +79,7 @@ class Table:
                 result1.append(bool(amount >= self.min))
             return (result1)
 
-        if tnum <= numroulette:
+        if tnum < numroulette:
 
             def SpinTheWheel(bets):
                 print(" Spinning the wheel...")
@@ -132,8 +147,8 @@ class Table:
             return [casinowin, croupiergain, playerwin]
 
 # Step 3: set up drink, 每一个player买drink的情况, 返回值是数字
-def Drink(balance):
-    if balance >= 60:
+def Drink(budget):
+    if budget >= 60:
         drink = random.randint(1, 2) * 20
         tips = random.randint(0, 20)
     else:
@@ -184,10 +199,10 @@ for round in range(0, 3): #后期调
 
     # Step 6.1: every player goes get either 1 or 2 drinks
     for player in range(0, total):
-        drink, pcost, tips = Drink(P[player].balance)
+        drink, pcost, tips = Drink(P[player].budget)
         C.balance += drink   # 赌场从饮料中赚的钱
-        B[random.randint(0, barman)].balance += tips    # barman从小费中赚的钱
-        P[player].balance += cost    # player花费的钱
+        B[random.randint(0, (barman - 1))].balance += tips    # barman从小费中赚的钱
+        P[player].budget += pcost    # player花费的钱
 
 
     # Step 6.2: 决定player和bet，分配player到桌子上
@@ -195,59 +210,72 @@ for round in range(0, 3): #后期调
     amount = []
     bet_temp = []
     bet = []
-    for tnum in range(1, (numroulette + numcraps + 1)):
-        if tnum <= numroulette:
-            for i, num in enumerate(WhichTable(total, numroulette, numcraps)):  # 是这个函数的返回值
-                if num == tnum:
+    P_new = []
+    for tnum in range(0, (numroulette + numcraps)):
+        if tnum < numroulette:
+            for i, num in enumerate(table):  # 是这个函数的返回值
+                if num == (tnum + 1):
                     if P[i].ptype == "returning":
-                        P[i].amount = TableMin(numroulette, numcraps)[tnum]  # return of this function
+                        P[i].amount = tablemin[tnum]  # return of this function
                     elif P[i].ptype == "onetime":
-                        P[i].amount = random.randint(0, int(P[i].balance / 3))
+                        P[i].amount = random.randint(0, int(P[i].budget / 3))
                     else:
-                        P[i].amount = random.randint(0, int(P[i].balance))
+                        P[i].amount = random.randint(0, int(P[i].budget))
                     P[i].bet = random.randint(0, 36)
-                    amount_temp = amount_temp.append(P[i].amount)
-                    bet_temp = bet_temp.append(P[i].bet)
+                    amount_temp.extend([P[i].amount])
+                    bet_temp.extend([P[i].bet])
+                    P_new.append(P[i])
                 else:
                     continue
         else:
-            for i, num in enumerate(WhichTable(total, numroulette, numcraps)):  # 是这个函数的返回值
-                if num == tnum:
+            for i, num in enumerate(table):  # 是这个函数的返回值
+                if num == (tnum + 1):
                     if P[i].ptype == "returning":
-                        P[i].amount = TableMin(numroulette, numcraps)[tnum]  # return of this function
+                        P[i].amount = tablemin[tnum]  # return of this function
                     elif P[i].ptype == "onetime":
-                        P[i].amount = random.randint(0, int(P[i].balance / 3))
+                        P[i].amount = random.randint(0, int(P[i].budget / 3))
                     else:
-                        P[i].amount = random.randint(0, int(P[i].balance))
+                        P[i].amount = random.randint(0, int(P[i].budget))
                     P[i].bet = random.randint(2, 12)
-                    amount_temp = amount_temp.append(P[i].amount)
-                    bet_temp = bet_temp.append(P[i].bet)
+                    amount_temp.extend([P[i].amount])
+                    bet_temp.extend([P[i].bet])
+                    P_new.append(P[i])
                 else:
                     continue
-        amount = amount.append([amount_temp])
-        bet = bet.append([bet_temp])
+        amount.append(amount_temp)
+        bet.append(bet_temp)
+
+    bet_new = []
+    bet_new = reduce(lambda x, y: x.extend(y) or x, [ i if isinstance(i, list) else [i] for i in bet])
 
     # Step 6.3: run every table
-    past = 0
-    for tablenum in range(0, (numroulette + numcraps)):
-        # 制定每个桌子的minbet
-        if tablenum+1 <= numroulette:
-            tablemin = random.choice(50, 100, 200)
-        else:
-            tablemin = random.choice(0, 25, 50)
-
-        t = Table(tablemin)
-        casinowin, croupiergain, playerwin = t.SimulateGame(bet[tablenum], amount[tablenum], (tablenum+1))
+    for tnum in range(0, (numroulette + numcraps)):
+        t = Table(tablemin[tnum])
+        casinowin, croupiergain, playerwin = t.SimulateGame(bet[tnum], amount[tnum], tnum)
         C.balance += casinowin
-        Cp[tablenum].balance += croupiergain
+        Cp[tnum].balance += croupiergain
         for player in range(0, len(playerwin)):
-            P[(player + past)].gain += playerwin[player]
-            P[(player + past)].budget -= bet[tablenum][player]
-            if P[(player + past)].budget == 0:
-                P[(player + past)].out = 1
+            P_new[player].gain += playerwin[player]
+            P_new[player].budget -= bet_new[player]
+            if P_new[player].budget == 0:
+                P_new[player].out = 1
             else:
                 continue
-        past += len(playerwin) - 1
+
+    # past = 0
+    # for tnum in range(0, (numroulette + numcraps)):
+    #     t = Table(tablemin[tnum])
+    #     casinowin, croupiergain, playerwin = t.SimulateGame(bet[tnum], amount[tnum], tnum)
+    #     C.balance += casinowin
+    #     Cp[tnum].balance += croupiergain
+    #     for player in range(0, len(playerwin)):
+    #         P[(player + past)].gain += playerwin[player]
+    #         P[(player + past)].budget -= bet[tnum][player]
+    #         if P[(player + past)].budget == 0:
+    #             P[(player + past)].out = 1
+    #         else:
+    #             continue
+    #     past += len(playerwin) - 1
 
     # Step 6.4: roll out parts of players
 
