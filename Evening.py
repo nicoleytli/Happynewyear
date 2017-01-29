@@ -1,10 +1,11 @@
 import random
-from functools import reduce
+
+
 
 # This is used to fix the random generator so we can test the output
 random.seed(3456)
 
-def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning, bachelor, freebudget, totalround):
+def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning, bachelor, freebudget):
 
     numroulette = numroulette
     numcraps = numcraps
@@ -15,7 +16,6 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
     returning = returning
     bachelor = bachelor
     freebudget = freebudget
-    totalround = totalround
 
 # Step 1: initialize player
 # Step 1.1: define class of player
@@ -58,13 +58,12 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
         P.append(Player(budget[i], 0, ptype[i], 0, 0, 0))
 
     # Step 2: initialize table
-    # Step 2.1: create a list of table number, arranging from the first to the last table, and length of this list is equal to number of all players
+    # Step 2.1: create a list of table number arranging from the first to the last table, and length of this list is equal to number of all players
     def WhichTable(total, numroulette, numcraps):
         table = []
         for i in range(total):
             table.extend([random.randint(1, (numroulette + numcraps))])
         return table
-
 
     # Step 2.2: A function to decide minimal betted amount for every table
     def TableMin(numroulette, numcraps):
@@ -148,7 +147,7 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
                     croupiergain = 0
                 return [casinowin, croupiergain, playerwin]
 
-    # Step 3: set up drink
+    # Step 3: set up function for drink
     def Drink(budget):
         if budget >= 60:
             drink = random.randint(1, 2) * 20
@@ -160,7 +159,7 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
         return drink, cost, tips
 
 
-    # Step 4: set up employee
+    # Step 4: Initialize employees
     class Croupier:
         def __init__(self, wage):
             self.wage = wage
@@ -185,10 +184,11 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
             self.cash = cash
             self.balance = cash
     # Class instantiation
+    cash = cash - (bachelor * total * 200)
     C = Casino(cash)
-
+    cashflow = []
     # Step 6: game begin
-    for round in range(0, totalround):
+    for round in range(0, 3):
 
         print("Round " + str(round+1))
 
@@ -212,7 +212,7 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
             Pp[player].budget -= pcost    # player cost
 
 
-        # Step 6.2: determine betted number and betted amount for all players, and assign them to different talbes
+        # Step 6.2: determine betted numbers and betted amounts for all players, and assign them to different talbes
 
         amount = []
         bet = []
@@ -242,10 +242,7 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
                 for i, num in enumerate(table):
                     if num == (tnum + 1):
                         if Pp[i].ptype == "returning":
-                            if Pp[i].budget >= tablemin[tnum]:
-                                Pp[i].amount = tablemin[tnum]
-                            else:
-                                Pp[i].amount = 0
+                            Pp[i].amount = tablemin[tnum]
                         elif Pp[i].ptype == "onetime":
                             Pp[i].amount = random.randint(0, int(Pp[i].budget / 3))
                         else:
@@ -267,6 +264,7 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
 
         # Step 6.3: run every table
         past = 0
+
         for tnum in range(0, (numroulette + numcraps)):
             t = Table(tablemin[tnum])
             casinowin, croupiergain, playerwin = t.SimulateGame(bet[tnum], amount[tnum], tnum)
@@ -281,4 +279,13 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
                     continue
             past += len(playerwin)
         P = P_new
-        print(C.balance)
+
+    profit = C.balance - C.cash
+    print(profit)
+    print(C.balance)
+
+    return C.balance, profit
+
+
+
+
