@@ -62,7 +62,7 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
     def WhichTable(total, numroulette, numcraps):
         table = []
         for i in range(total):
-            table.extend([random.randint(1, (numroulette + numcraps + 1))])
+            table.extend([random.randint(1, (numroulette + numcraps))])
         return table
 
 
@@ -95,7 +95,6 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
             if tnum < numroulette:
 
                 def SpinTheWheel(bets):
-                    print(" Spinning the wheel...")
                     truth = random.randint(0, 36)
                     result2 = []
                     number = 0
@@ -105,12 +104,7 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
                             number += 1
                         else:
                             continue
-                    print("Ball lands on " + str(truth))
 
-                    if number != 0:
-                        print("There are " + str(number) + " correct bet(s)")
-                    else:
-                        print("No winners this round")
                     return (result2)
 
                 playerwin_temp = [i * j * k for i, j, k in zip(amounts, AboveMinimum(amounts), SpinTheWheel(bets))]
@@ -130,7 +124,6 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
 
                 def RollTheDices(bets):
                     summ = Dices()
-                    print("The sum of dices is " + str(summ))
                     number = 0
                     result2 = []
                     for bet in bets:
@@ -140,10 +133,6 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
                         else:
                             continue
 
-                    if number > 0:
-                        print("There are " + str(number) + " winner(s)")
-                    else:
-                        print("No winners this round")
                     return (result2), summ
 
                 r, summ = RollTheDices(bets)
@@ -203,7 +192,6 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
 
         print("Round " + str(round+1))
 
-        table = WhichTable(total, numroulette, numcraps)
         # Step 6.0: decide how many player are allowed to play
         Pp = []
         for player in range(0, total):
@@ -211,6 +199,9 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
                 Pp.append(P[player])
             else:
                 continue
+
+        total = len(Pp)
+        table = WhichTable(total, numroulette, numcraps)
 
 
         # Step 6.1: every player goes get either 1 or 2 drinks
@@ -233,7 +224,10 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
                 for i, num in enumerate(table):  # 是这个函数的返回值
                     if num == (tnum + 1):
                         if Pp[i].ptype == "returning":
-                            Pp[i].amount = tablemin[tnum]  # return of this function
+                            if Pp[i].budget >= tablemin[tnum]:
+                                Pp[i].amount = tablemin[tnum]  # return of this function
+                            else:
+                                Pp[i].amount = 0
                         elif Pp[i].ptype == "onetime":
                             Pp[i].amount = random.randint(0, int(Pp[i].budget / 3))
                         else:
@@ -248,7 +242,10 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
                 for i, num in enumerate(table):  # 是这个函数的返回值
                     if num == (tnum + 1):
                         if Pp[i].ptype == "returning":
-                            Pp[i].amount = tablemin[tnum]  # return of this function
+                            if Pp[i].budget >= tablemin[tnum]:
+                                Pp[i].amount = tablemin[tnum]  # return of this function
+                            else:
+                                Pp[i].amount = 0
                         elif Pp[i].ptype == "onetime":
                             Pp[i].amount = random.randint(0, int(Pp[i].budget / 3))
                         else:
@@ -262,23 +259,32 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
             amount.append(amount_temp)
             bet.append(bet_temp)
 
+        amount_new = []
 
-        bet_new = reduce(lambda x, y: x.extend(y) or x, [ i if isinstance(i, list) else [i] for i in bet])
+        for i in range(0, len(amount)):
+            for j in range(0, len(amount[i])):
+                amount_new.extend([amount[i][j]])
+        # amount_new = reduce(lambda x, y: x.extend(y) or x, [ i if isinstance(i, list) else [i] for i in amount])
 
         # Step 6.3: run every table
+
+        past = 0
         for tnum in range(0, (numroulette + numcraps)):
             t = Table(tablemin[tnum])
             casinowin, croupiergain, playerwin = t.SimulateGame(bet[tnum], amount[tnum], tnum)
             C.balance += casinowin
             Cp[tnum].balance += croupiergain
             for player in range(0, len(playerwin)):
-                P_new[player].gain += playerwin[player]
-                P_new[player].budget -= bet_new[player]
-                if P_new[player].budget == 0:
-                    P_new[player].out = 1
+                P_new[(player + past)].gain += playerwin[player]
+                # print(str(P_new[(player + past)].budget) + " : " + str(player + past))
+                P_new[(player + past)].budget -= amount_new[(player + past)]
+                # print(str(P_new[(player + past)].budget) + " : " + str(player + past))
+                # print(amount_new[(player + past)])
+                # print(P_new[(player + past)].ptype)
+                if P_new[(player + past)].budget == 0:
+                    P_new[(player + past)].out = 1
                 else:
                     continue
+            past += len(playerwin)
         P = P_new
-        total = len(P)
         print(C.balance)
-    return C.balance
