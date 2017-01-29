@@ -18,7 +18,7 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
     totalround = totalround
 
 # Step 1: initialize player
-# Step 1.1: class
+# Step 1.1: define class of player
     class Player:
         def __init__(self, budget, gain, ptype, amount, bet, out):
             self.budget = budget
@@ -28,7 +28,7 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
             self.bet = bet
             self.out = out
 
-    # Step 1.2: fix budget and type
+    # Step 1.2: compute budget and decide type of every player
     def GetPtype(total, returning, bachelor):
         numreturn = int(total * returning)
         numbachelor = int(total * bachelor)
@@ -50,7 +50,7 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
                 budget.extend([random.randint(200, 500) + freebudget])
         return budget
 
-    # Step 1.3: 实例化
+    # Step 1.3: Class instantiation
     ptype = GetPtype(total, returning, bachelor)
     P = []
     budget = GetBudget(ptype, freebudget)
@@ -58,7 +58,7 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
         P.append(Player(budget[i], 0, ptype[i], 0, 0, 0))
 
     # Step 2: initialize table
-    # Step 2.1: 生成和player人数相等的table数，用于分配player到各个table
+    # Step 2.1: create a list of table number, arranging from the first to the last table, and length of this list is equal to number of all players
     def WhichTable(total, numroulette, numcraps):
         table = []
         for i in range(total):
@@ -66,7 +66,7 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
         return table
 
 
-    # Step 2.2: 返回所有table的最小amount
+    # Step 2.2: A function to decide minimal betted amount for every table
     def TableMin(numroulette, numcraps):
         tablemin = []
         for i in range(0, (numroulette + numcraps)):
@@ -78,14 +78,14 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
 
     tablemin = TableMin(numroulette, numcraps)
 
-    # Step 2.3: 制定每个table的规则
+    # Step 2.3: Winning rules and results for each tables
     class Table:
         def __init__(self, min):
             self.min = min
             self.weight = [36, 18, 12, 9, 7.2, 6, 7.2, 9, 12, 18, 36]
 
 
-        def SimulateGame(self, bets, amounts, tnum):                     # tnum 可以分辨ttype
+        def SimulateGame(self, bets, amounts, tnum):
             def AboveMinimum(amounts):
                 result1 = []
                 for amount in amounts:
@@ -148,7 +148,7 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
                     croupiergain = 0
                 return [casinowin, croupiergain, playerwin]
 
-    # Step 3: set up drink, 每一个player买drink的情况, 返回值是数字
+    # Step 3: set up drink
     def Drink(budget):
         if budget >= 60:
             drink = random.randint(1, 2) * 20
@@ -165,26 +165,26 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
         def __init__(self, wage):
             self.wage = wage
             self.balance = wage
-    #实例化
+    # Class instantiation
     Cp = []
     for i in range(0, (numroulette + numcraps)):
-        Cp.append(Croupier(wage))       #这里的wage是外部输入的
+        Cp.append(Croupier(wage))
 
     class Barman:
         def __init__(self, wage):
             self.wage = wage
             self.balance = wage
-    #实例化
+    # Class instantiation
     B = []
-    for i in range(0, barman):      # barman 是输入的barman数量
-        B.append(Barman(wage))         #这里的wage是外部输入的
+    for i in range(0, barman):
+        B.append(Barman(wage))
 
     # Step 5: set up casino
     class Casino:
         def __init__(self, cash):
             self.cash = cash
             self.balance = cash
-    #实例化
+    # Class instantiation
     C = Casino(cash)
 
     # Step 6: game begin
@@ -192,7 +192,7 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
 
         print("Round " + str(round+1))
 
-        # Step 6.0: decide how many player are allowed to play
+        # Step 6.0: decide how many players are allowed to play
         Pp = []
         for player in range(0, total):
             if P[player].out == 0:
@@ -207,12 +207,12 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
         # Step 6.1: every player goes get either 1 or 2 drinks
         for player in range(0, total):
             drink, pcost, tips = Drink(Pp[player].budget)
-            C.balance += drink   # 赌场从饮料中赚的钱
-            B[random.randint(0, (barman - 1))].balance += tips    # barman从小费中赚的钱
-            Pp[player].budget += pcost    # player花费的钱
+            C.balance += drink   # casino gains from selling drinks
+            B[random.randint(0, (barman - 1))].balance += tips    # one of the barmen get tips
+            Pp[player].budget -= pcost    # player cost
 
 
-        # Step 6.2: 决定player和bet，分配player到桌子上
+        # Step 6.2: determine betted number and betted amount for all players, and assign them to different talbes
 
         amount = []
         bet = []
@@ -221,11 +221,11 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
             amount_temp = []
             bet_temp = []
             if tnum < numroulette:
-                for i, num in enumerate(table):  # 是这个函数的返回值
+                for i, num in enumerate(table):
                     if num == (tnum + 1):
                         if Pp[i].ptype == "returning":
                             if Pp[i].budget >= tablemin[tnum]:
-                                Pp[i].amount = tablemin[tnum]  # return of this function
+                                Pp[i].amount = tablemin[tnum]
                             else:
                                 Pp[i].amount = 0
                         elif Pp[i].ptype == "onetime":
@@ -239,11 +239,11 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
                     else:
                         continue
             else:
-                for i, num in enumerate(table):  # 是这个函数的返回值
+                for i, num in enumerate(table):
                     if num == (tnum + 1):
                         if Pp[i].ptype == "returning":
                             if Pp[i].budget >= tablemin[tnum]:
-                                Pp[i].amount = tablemin[tnum]  # return of this function
+                                Pp[i].amount = tablemin[tnum]
                             else:
                                 Pp[i].amount = 0
                         elif Pp[i].ptype == "onetime":
@@ -264,10 +264,8 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
         for i in range(0, len(amount)):
             for j in range(0, len(amount[i])):
                 amount_new.extend([amount[i][j]])
-        # amount_new = reduce(lambda x, y: x.extend(y) or x, [ i if isinstance(i, list) else [i] for i in amount])
 
         # Step 6.3: run every table
-
         past = 0
         for tnum in range(0, (numroulette + numcraps)):
             t = Table(tablemin[tnum])
@@ -276,11 +274,7 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
             Cp[tnum].balance += croupiergain
             for player in range(0, len(playerwin)):
                 P_new[(player + past)].gain += playerwin[player]
-                # print(str(P_new[(player + past)].budget) + " : " + str(player + past))
                 P_new[(player + past)].budget -= amount_new[(player + past)]
-                # print(str(P_new[(player + past)].budget) + " : " + str(player + past))
-                # print(amount_new[(player + past)])
-                # print(P_new[(player + past)].ptype)
                 if P_new[(player + past)].budget == 0:
                     P_new[(player + past)].out = 1
                 else:
