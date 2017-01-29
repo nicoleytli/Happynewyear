@@ -149,15 +149,30 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
 
     # Step 3: set up function for drink
     def Drink(budget):
-        if budget >= 60:
-            drink = random.randint(1, 2) * 20
-            tips = random.randint(0, 20)
+        time = random.randint(1, 3)
+        if time <= 2:
+            if budget >= 60:
+                drink = 2 * 20
+                tips1 = random.randint(0, 20)
+                if (budget - drink - tips1) < 20:
+                    tips2 = random.randint(0, (budget - drink - tips1))
+                else:
+                    tips2 = random.randint(0, 20)
+            else:
+                drink = 0
+                tips1 = 0
+                tips2 = 0
         else:
-            drink = 0
-            tips = 0
-        cost = drink + tips
-        return drink, cost, tips
-
+            if budget >= 60:
+                drink = 20
+                tips1 = random.randint(0, 20)
+                tips2 = 0
+            else:
+                drink = 0
+                tips1 = 0
+                tips2 = 0
+        cost = drink + tips1 + tips2
+        return drink, cost, tips1, tips2
 
     # Step 4: Initialize employees
     class Croupier:
@@ -206,9 +221,10 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
 
         # Step 6.1: every player goes get either 1 or 2 drinks
         for player in range(0, total):
-            drink, pcost, tips = Drink(Pp[player].budget)
+            drink, pcost, tips1, tips2 = Drink(Pp[player].budget)
             C.balance += drink   # casino gains from selling drinks
-            B[random.randint(0, (barman - 1))].balance += tips    # one of the barmen get tips
+            B[random.randint(0, (barman - 1))].balance += tips1
+            B[random.randint(0, (barman - 1))].balance += tips2
             Pp[player].budget -= pcost    # player cost
 
 
@@ -281,8 +297,7 @@ def SimulateEvening(numroulette, numcraps, barman, wage, cash, total, returning,
         P = P_new
 
     profit = C.balance - C.cash
-    print(profit)
-    print(C.balance)
+
 
     return C.balance, profit
 
