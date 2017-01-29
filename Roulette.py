@@ -15,9 +15,9 @@ class Roulette:
 
         def SpinTheWheel(bets):
             print(" Spinning the wheel...")
-            truth = random.randint(0, 36)
+            truth = random.randint(0, 36)              # The correct bet
             result2 = []
-            number = 0
+            number = 0                                 # Used to indicate the number of correct bets
             for bet in bets:
                 result2.append(bool(bet == truth))
                 if bet == truth:
@@ -32,6 +32,7 @@ class Roulette:
                 print("No winners this round")
             return (result2)
 
+        # If bet=correct bet and amount>=minimal amount, player wins
         playerwin_temp = [amount * abovemin * bet for amount, abovemin, bet in zip(amounts, AboveMinimum(amounts), SpinTheWheel(bets))]
         casinowin = sum(amounts) - sum(playerwin_temp)
         playerwin = [i * 30 for i in playerwin_temp]
