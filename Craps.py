@@ -5,7 +5,7 @@ random.seed(3456)
 class Craps:
     def __init__(self, min):
         self.min = min
-        self.weight = [36, 18, 12, 9, 7.2, 6, 7.2, 9, 12, 18, 36]
+        self.weight = [36, 18, 12, 9, 7.2, 6, 7.2, 9, 12, 18, 36]           # Define weight to scale the gains
 
     def SimulateGame(self, bets, amounts):
         def AboveMinimum(amounts):
@@ -19,9 +19,9 @@ class Craps:
 
 
         def RollTheDices(bets):
-            summ = Dices()
+            summ = Dices()                                                  # The correct bet
             print("The sum of dices is " + str(summ))
-            number = 0
+            number = 0                                                      # Used to indicate the number of correct bets
             result2 = []
             for bet in bets:
                 result2.append(bool(bet == summ))
@@ -38,7 +38,9 @@ class Craps:
 
         r, summ = RollTheDices(bets)
 
+        # If bet=correct bet and amount>=minimal amount, player wins
         playerwin_temp = [amount * abovemin * bet for amount, abovemin, bet in zip(amounts, AboveMinimum(amounts), r)]
+        # 0.9 * amount * weight
         playerwin = [0.9 * amount * self.weight[summ - 2] for amount in playerwin_temp]
         casinowin = sum(amounts) - sum(playerwin)
         return [casinowin, playerwin]
